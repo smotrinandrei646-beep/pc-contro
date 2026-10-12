@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пульт управления</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #f4f4f5);
+            color: var(--tg-theme-text-color, #18181b);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .section-title {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #71717a);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+            margin-bottom: -12px;
+            font-weight: 600;
+        }
+        .list-group {
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .list-item {
+            background: none;
+            color: var(--tg-theme-text-color, #18181b);
+            border: none;
+            outline: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.15s ease;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:active { background-color: rgba(0, 0, 0, 0.06); }
+        .text-danger { color: #ef4444 !important; }
+        .text-success { color: #10b981 !important; }
+        .list-item:active { background-color: rgba(0, 0, 0, 0.06); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+        .grid-2 .list-item:first-child { border-right: 1px solid rgba(0, 0, 0, 0.05); }
+        .grid-2 .list-item { border-bottom: none; text-align: center; justify-content: center; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+        .grid-3 .list-item { border-bottom: none; border-right: 1px solid rgba(0, 0, 0, 0.05); text-align: center; justify-content: center; }
+        .grid-3 .list-item:last-child { border-right: none; }
+    </style>
+</head>
+<body>
+
+    <div class="section-title">Шпионские функции</div>
+    <div class="list-group">
+        <button class="list-item" onclick="sendCmd('fn_screen')">📸 Снимок экрана ПК</button>
+        <button class="list-item" onclick="sendCmd('fn_webcam')">📷 Фото с веб-камеры</button>
+        <button class="list-item" onclick="sendCmd('fn_record')">🎙 Запись микрофона (10с)</button>
+    </div>
+
+    <div class="section-title">Состояние системы</div>
+    <div class="list-group">
+        <button class="list-item" onclick="sendCmd('fn_ram')">📟 Проверить память RAM</button>
+    </div>
+
+    <div class="section-title">Управление Windows</div>
+    <div class="list-group">
+        <div class="grid-3">
+            <button class="list-item" onclick="sendCmd('fn_vol_up')">🔊 Громче</button>
+            <button class="list-item" onclick="sendCmd('fn_vol_mute')">🔇 Мут</button>
+            <button class="list-item" onclick="sendCmd('fn_vol_down')">🔉 Тише</button>
+        </div>
+        <button class="list-item" onclick="sendCmd('fn_lock')">🔒 Заблокировать компьютер</button>
+    </div>
+
+    <div class="section-title">Питание</div>
+    <div class="list-group">
+        <button class="list-item text-success" onclick="sendCmd('fn_wake')">🟢 Включить компьютер</button>
+        <div class="grid-2">
+            <button class="list-item text-danger" onclick="sendCmd('fn_shutdown')">🚨 Выключить</button>
+            <button class="list-item" onclick="sendCmd('fn_restart')">🔄 Рестарт</button>
+        </div>
+        <button class="list-item" onclick="sendCmd('fn_sleep')">💤 Режим сна</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        if (tg.HapticFeedback) {
+            document.querySelectorAll('.list-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    tg.HapticFeedback.impactOccurred('light');
+                });
+            });
+        }
+
+        function sendCmd(command) {
+            tg.sendData(command);
+            tg.close();
+        }
+    </script>
+</body>
+</html>
