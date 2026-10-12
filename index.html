@@ -3,256 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSI Control Panel</title>
+    <title>MSI PC Control Panel</title>
+    <!-- Подключаем Telegram WebApp API -->
     <script src="https://telegram.org"></script>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --text: #f8fafc; --text-muted: #94a3b8; --border: #334155; --success: #22c55e; }
-        [data-theme="light"] { --bg: #f1f5f9; --panel: #ffffff; --accent: #2563eb; --text: #0f172a; --text-muted: #64748b; --border: #cbd5e1; }
-        [data-theme="hacker"] { --bg: #000; --panel: #0a0f0d; --accent: #00ff66; --text: #00ff66; --text-muted: #00aa44; --border: #00ff66; font-family: monospace; }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-        
-        .dashboard { display: flex; flex: 1; flex-direction: column; max-width: 1200px; width: 100%; margin: 0 auto; }
-        .sidebar { display: flex; overflow-x: auto; background: var(--panel); border-bottom: 1px solid var(--border); padding: 10px; gap: 8px; sticky: top; z-index: 100; }
-        .nav-btn { background: transparent; border: 1px solid transparent; color: var(--text); padding: 10px 16px; font-size: 0.9rem; border-radius: 8px; cursor: pointer; white-space: nowrap; font-weight: 500; }
-        .nav-btn.active { background-color: var(--accent); color: #fff; }
-        .nav-btn:active { transform: scale(0.95); }
+        /* Изначальная Тёмная тема по умолчанию */
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+        }
 
-        .main { flex: 1; padding: 15px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .server-config { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 15px; }
-        .server-config input { width: 100%; padding: 10px; margin-top: 6px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; font-family: monospace; }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .cmd-btn { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 18px 10px; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.9rem; text-align: center; font-weight: 500; }
-        .cmd-btn:hover { border-color: var(--accent); }
-        .cmd-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.05); }
-        
-        .explorer { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .exp-nav { display: flex; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 15px; border-bottom: 1px solid var(--border); gap: 12px; }
-        .back-btn { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .back-btn:active { transform: scale(0.92); }
-        .path-text { font-family: monospace; color: var(--text-muted); word-break: break-all; font-size: 0.85rem; }
-        
-        .exp-list { list-style: none; max-height: 350px; overflow-y: auto; }
-        .exp-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); }
-        .exp-item:last-child { border-bottom: none; }
-        .item-click { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; padding: 4px 0; }
-        .item-name { font-weight: 500; font-size: 0.95rem; }
-        .pc-open-btn { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .pc-open-btn:active { transform: scale(0.92); }
-        #exp-status { padding: 15px; color: var(--text-muted); font-size: 0.9rem; }
-        
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --panel-bg: #ffffff;
+            --accent-color: #2563eb;
+            --text-color: #0f172a;
+            --border-color: #cbd5e1;
+        }
+
+        [data-theme="hacker"] {
+            --bg-color: #000000;
+            --panel-bg: #0a0f0d;
+            --accent-color: #00ff66;
+            --text-color: #00ff66;
+            --border-color: #00ff66;
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-direction: column;
+        }
+
+        /* Навигация (Вкладки) */
+        .sidebar {
+            display: flex;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-color);
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.active {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* Адаптивная сетка кнопок */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .card-btn {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 20px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card-btn .btn-icon {
+            font-size: 1.8rem;
+        }
+
+        .btn-danger { border-left: 4px solid var(--danger-color); }
+        .btn-success { border-left: 4px solid var(--success-color); }
+
         @media (min-width: 768px) {
-            .dashboard { flex-direction: row; }
-            .sidebar { width: 240px; flex-direction: column; border-bottom: none; border-right: 1px solid var(--border); overflow-x: visible; }
-            .nav-btn { width: 100%; text-align: left; }
-            .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+            .dashboard-container { flex-direction: row; }
+            .sidebar { width: 260px; border-bottom: none; border-right: 1px solid var(--border-color); flex-direction: column; overflow-x: visible; padding: 20px 15px; }
+            .nav-btn { width: 100%; text-align: left; padding: 12px 16px; }
+            .control-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <!-- Навигация -->
+    <div class="dashboard-container">
+        <!-- Меню переключения вкладок (1-5) -->
         <nav class="sidebar">
             <button class="nav-btn active" data-tab="spy">👁️ Шпионаж</button>
             <button class="nav-btn" data-tab="sound">🔊 Звук & Плеер</button>
-            <button class="nav-btn" data-tab="programs">📂 Проводник</button>
+            <button class="nav-btn" data-tab="programs">📂 Программы</button>
             <button class="nav-btn" data-tab="power">⚡ Питание</button>
-            <button class="nav-btn" data-tab="style">🎨 Стили</button>
+            <button class="nav-btn" data-tab="style">🎨 Стиль</button>
         </nav>
 
-        <!-- Главный экран -->
-        <main class="main">
-            <div class="server-config">
-                <label>🌐 Ссылка из бота (ngrok):</label>
-                <input type="text" id="pc-api-url" placeholder="https://ngrok-free.app">
-            </div>
+        <!-- Основные панели управления -->
+        <main class="main-content">
 
-            <!-- ШПИОНАЖ -->
+            <!-- 1. ШПИОНАЖ -->
             <div id="tab-spy" class="tab-content active">
-                <div class="grid">
-                    <button class="cmd-btn" data-action="screenshot">📸 <span>Скриншот экрана</span></button>
-                    <button class="cmd-btn" data-action="webcam">📷 <span>Веб-камера</span></button>
+                <div class="tab-title">👁️ Модули шпионажа</div>
+                <div class="control-grid">
+                    <button class="card-btn" data-action="screenshot"><span class="btn-icon">📸</span>Скриншот экрана</button>
+                    <button class="card-btn" data-action="webcam"><span class="btn-icon">📷</span>Веб-камера</button>
+                    <button class="card-btn" data-action="record_10s"><span class="btn-icon">🎙️</span>Запись микрофона 10с</button>
+                    <button class="card-btn" data-action="record_60s"><span class="btn-icon">🎵</span>Запись микрофона 60с</button>
+                    <button class="card-btn" data-action="read_clipboard"><span class="btn-icon">📋</span>Буфер обмена</button>
                 </div>
             </div>
 
-            <!-- ЗВУК -->
+            <!-- 2. ЗВУК И ПЛЕЕР -->
             <div id="tab-sound" class="tab-content">
-                <div class="grid">
-                    <button class="cmd-btn" data-action="volume_up">🔊 <span>Громче</span></button>
-                    <button class="cmd-btn" data-action="volume_down">🔉 <span>Тише</span></button>
-                    <button class="cmd-btn" data-action="mute">🔇 <span>Мут звука</span></button>
+                <div class="tab-title">🔊 Звук и Мультимедиа плеер</div>
+                <div class="control-grid">
+                    <button class="card-btn" data-action="volume_up"><span class="btn-icon">🔊</span>Громкость +</button>
+                    <button class="card-btn" data-action="volume_down"><span class="btn-icon">🔉</span>Громкость -</button>
+                    <button class="card-btn btn-danger" data-action="mute"><span class="btn-icon">🔇</span>Мут</button>
+                    <button class="card-btn" data-action="beep"><span class="btn-icon">🔔</span>Сигнал Beep</button>
+                    <button class="card-btn btn-danger" data-action="siren"><span class="btn-icon">🚨</span>Сирена</button>
+                    <button class="card-btn" data-action="play_pause"><span class="btn-icon">⏯️</span>Пауза/Плей</button>
+                    <button class="card-btn" data-action="track_next"><span class="btn-icon">⏭️</span>След. трек</button>
+                    <button class="card-btn" data-action="track_prev"><span class="btn-icon">⏮️</span>Пред. трек</button>
                 </div>
             </div>
 
-            <!-- ПРОГРАММЫ / ПРОВОДНИК -->
+            <!-- 3. ПРОГРАММЫ -->
             <div id="tab-programs" class="tab-content">
-                <div class="explorer">
-                    <div class="exp-nav">
-                        <button class="back-btn" id="btn-exp-back">⬅️ Назад</button>
-                        <span class="path-text" id="current-path">root</span>
-                    </div>
-                    <div id="exp-status">Загрузка структуры...</div>
-                    <ul class="exp-list" id="explorer-list"></ul>
+                <div class="tab-title">🚀 Быстрый запуск и Закрытие ПО</div>
+                <div class="control-grid">
+                    <button class="btn-success card-btn" data-action="run_chrome"><span class="btn-icon">🌐</span>Запуск Chrome</button>
+                    <button class="btn-success card-btn" data-action="run_notepad"><span class="btn-icon">📝</span>Блокнот</button>
+                    <button class="btn-success card-btn" data-action="run_calc"><span class="btn-icon">🧮</span>Калькулятор</button>
+                    <button class="btn-danger card-btn" data-action="kill_chrome"><span class="btn-icon">🛑</span>Закрыть Chrome</button>
+                    <button class="btn-danger card-btn" data-action="kill_discord"><span class="btn-icon">💬</span>Закрыть Discord</button>
+                    <button class="btn-danger card-btn" data-action="kill_games"><span class="btn-icon">🎮</span>Закрыть Игры</button>
                 </div>
             </div>
 
-            <!-- ПИТАНИЕ -->
+            <!-- 4. ПИТАНИЕ -->
             <div id="tab-power" class="tab-content">
-                <div class="grid">
-                    <button class="cmd-btn" data-action="ram_info">📊 <span>RAM Память</span></button>
-                    <button class="cmd-btn" data-action="lock_win">🔒 <span>Блок Win+L</span></button>
-                    <button class="cmd-btn" data-action="shutdown">🛑 <span>Выключить ПК</span></button>
+                <div class="tab-title">⚡ Анализ ресурсов и Питание</div>
+                <div class="control-grid">
+                    <button class="card-btn" data-action="ram_info"><span class="btn-icon">📊</span>Анализ RAM</button>
+                    <button class="card-btn" data-action="cpu_info"><span class="btn-icon">📈</span>Нагрузка CPU</button>
+                    <button class="btn-danger card-btn" data-action="lock_win"><span class="btn-icon">🔒</span>Блокировка Win+L</button>
+                    <button class="card-btn" data-action="minimize_all"><span class="btn-icon">📉</span>Свернуть все окна</button>
+                    <button class="btn-danger card-btn" data-action="alt_f4"><span class="btn-icon">❌</span>Alt+F4</button>
+                    <button class="btn-danger card-btn" data-action="shutdown"><span class="btn-icon">🛑</span>Выключить ПК</button>
+                    <button class="btn-danger card-btn" data-action="restart"><span class="btn-icon">🔄</span>Рестарт</button>
+                    <button class="card-btn" data-action="sleep"><span class="btn-icon">🌙</span>Сон</button>
                 </div>
             </div>
 
-            <!-- СТИЛИ -->
-            <div id="tab-style" class="tab-content">
-                <div class="grid">
-                    <button class="cmd-btn" data-theme-set="dark">🌑 <span>Тёмная</span></button>
-                    <button class="cmd-btn" data-theme-set="light">☀️ <span>Светлая</span></button>
-                    <button class="cmd-btn" data-theme-set="hacker">🟢 <span>Хакер</span></button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let currentPath = "root";
-        let pathHistory = [];
-
-        // Инициализация при старте страницы
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedUrl = localStorage.getItem("pc_api_endpoint");
-            if (savedUrl) {
-                document.getElementById('pc-api-url').value = savedUrl;
-            }
-            setupEventListeners();
-            loadDirectory("root");
-        });
-
-        // Навешиваем обработчики событий (Защита от ложных и некликающих тапов)
-        function setupEventListeners() {
-            // Переключение вкладок
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                    
-                    const tabId = btn.getAttribute('data-tab');
-                    btn.classList.add('active');
-                    document.getElementById(`tab-${tabId}`).classList.add('active');
-                });
-            });
-
-            // Клики по обычным кнопкам действий
-            document.querySelectorAll('.cmd-btn[data-action]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const action = btn.getAttribute('data-action');
-                    triggerAction(action, "");
-                });
-            });
-
-            // Клики по кнопкам смены темы
-            document.querySelectorAll('.cmd-btn[data-theme-set]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const theme = btn.getAttribute('data-theme-set');
-                    document.documentElement.setAttribute('data-theme', theme);
-                });
-            });
-
-            // Кнопка назад в проводнике
-            document.getElementById('btn-exp-back').addEventListener('click', () => {
-                if (pathHistory.length > 0) {
-                    loadDirectory(pathHistory.pop());
-                } else if (currentPath !== "root") {
-                    loadDirectory("root");
-                }
-            });
-
-            // Отслеживание ручного ввода ссылки ngrok
+            <!-- 5. СТИЛЬ -->
 Use code with caution.
-document.getElementById('pc-api-url').addEventListener('change', (e) => {
-localStorage.setItem("pc_api_endpoint", e.target.value.trim());
-loadDirectory("root");
+🎨 Переключатель тем интерфейса
+
+🌑Тёмная
+☀️Светлая
+🟢Хакерская зеленая
+
+const tg = window.Telegram.WebApp;
+tg.expand();
+// Инициализация при полной загрузке страницы
+document.addEventListener("DOMContentLoaded", () => {
+setupListeners();
+});
+// Навешивание надежных обработчиков клика без использования onclick="" атрибутов
+function setupListeners() {
+// Клики по вкладкам меню навигации
+document.querySelectorAll('.nav-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+const tabId = btn.getAttribute('data-tab');
+btn.classList.add('active');
+document.getElementById(tab-${tabId}).classList.add('active');
+});
+});
+// Клики по функциональным кнопкам пульта
+document.querySelectorAll('.card-btn[data-action]').forEach(btn => {
+btn.addEventListener('click', () => {
+const actionName = btn.getAttribute('data-action');
+// Отправка JSON-команды обратно боту в чат стандартным методом Telegram WebApp
+tg.sendData(JSON.stringify({ action: actionName, path: "" }));
+});
+});
+// Клики по переключателям тем оформления
+document.querySelectorAll('.card-btn[data-theme-set]').forEach(btn => {
+btn.addEventListener('click', () => {
+const selectTheme = btn.getAttribute('data-theme-set');
+document.documentElement.setAttribute('data-theme', selectTheme);
+});
 });
 }
-// Запрос к ПК через fetch
-async function triggerAction(actionName, extraPath = "") {
-const endpoint = document.getElementById('pc-api-url').value.trim();
-if (!endpoint) return;
-try {
-const response = await fetch(endpoint, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ action: actionName, path: extraPath })
-});
-const result = await response.json();
-if (actionName === "list_dir") {
-renderExplorer(result);
-}
-} catch (error) {
-console.error(error);
-document.getElementById('exp-status').innerText = "Ошибка соединения. Проверь статус ngrok.";
-}
-}
-function loadDirectory(path) {
-document.getElementById('exp-status').style.display = 'block';
-document.getElementById('exp-status').innerText = "Получение списка файлов...";
-document.getElementById('explorer-list').innerHTML = '';
-currentPath = path;
-document.getElementById('current-path').innerText = path;
-triggerAction("list_dir", path);
-}
-// Отрисовка Проводника с абсолютной изоляцией кликов
-function renderExplorer(jsonData) {
-document.getElementById('exp-status').style.display = 'none';
-const list = document.getElementById('explorer-list');
-list.innerHTML = '';
-if (jsonData.error) {
-document.getElementById('exp-status').style.display = 'block';
-document.getElementById('exp-status').innerText = "Ошибка: " + jsonData.error;
-return;
-}
-if (jsonData.current_path !== "root") {
-currentPath = jsonData.current_path;
-}
-// Выводим папки
-jsonData.folders.forEach(folder => {
-const fullPath = currentPath === "root" ? folder : currentPath + '\' + folder;
-const li = document.createElement('li');
-li.className = 'exp-item';
-li.innerHTML = <div class="item-click"> <span>📁</span> <span class="item-name">${folder}</span> </div> <button class="pc-open-btn">🖥️ На ПК</button>;
-// Обработчик входа в папку
-li.querySelector('.item-click').addEventListener('click', () => {
-pathHistory.push(currentPath);
-loadDirectory(fullPath);
-});
-// Обработчик удаленного открытия папки прямо на ПК
-li.querySelector('.pc-open-btn').addEventListener('click', (e) => {
-e.stopPropagation();
-triggerAction('open_item', fullPath);
-});
-list.appendChild(li);
-});
-// Выводим файлы
-jsonData.files.forEach(file => {
-const fullPath = currentPath + '\' + file;
-const li = document.createElement('li');
-li.className = 'exp-item';
-li.innerHTML = <div class="item-click" style="cursor: default;"> <span>📄</span> <span class="item-name">${file}</span> </div> <button class="pc-open-btn">🖥️ На ПК</button>;
-// Обработчик удаления / запуска файла на ПК
-li.querySelector('.pc-open-btn').addEventListener('click', () => {
-triggerAction('open_item', fullPath);
-});
-list.appendChild(li);
-});
-}
+
+
+
+<FollowUp>
+Залей этот финальный чистый код в репозиторий на GitHub. Как только **жёлтый кружок сборки Actions сменится на зелёную галочку**, твой пульт вернётся к своему каноничному виду! Проверь, всё ли теперь отображается правильно?
+</FollowUp>
